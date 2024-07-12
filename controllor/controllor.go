@@ -33,6 +33,13 @@ func (con *Controller) HandleGetBalance(c *gin.Context) {
 	balance := con.service.GetBalance(uuid)
 	utils.SuccessResponse(c, "ok", balance)
 }
+
+type BalanceRankingResponse struct {
+	Ranking    int              `json:"ranking"`
+	PlayerInfo model.PlayerInfo `json:"playerInfo"`
+	Balance    float32          `json:"balance"`
+}
+
 func (con *Controller) HandleGetBalanceRanking(c *gin.Context) {
 	page := c.Query("page")
 	pageInt, err := strconv.Atoi(page)
@@ -45,9 +52,65 @@ func (con *Controller) HandleGetBalanceRanking(c *gin.Context) {
 		utils.ErrorResponse(c, 401, "invalid page number", "")
 		return
 	}
+
 	ranking := con.service.GetBalanceRanking(pageInt)
-	utils.SuccessResponse(c, "ok", ranking)
+	var res []BalanceRankingResponse
+	for i, record := range ranking {
+		res = append(res, BalanceRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerInfo: model.PlayerInfo{Uuid: record.UID, Name: record.Player, Avatar: con.service.GetAvatar(record.Player)}, Balance: record.Balance})
+	}
+	utils.SuccessResponse(c, "ok", res)
 }
+
+type PlayerKillResponse struct {
+	Ranking              int    `json:"ranking"`
+	PlayerId             string `json:"player_id"`
+	PlayerName           string `json:"player_name"`
+	AncientGuardianKills int    `json:"ancient_guardian_kills"`
+	PhantomKills         int    `json:"phantom_kills"`
+	PiglinKills          int    `json:"piglin_kills"`
+	EnderDragonKills     int    `json:"ender_dragon_kills"`
+	WitherKills          int    `json:"wither_kills"`
+	WardenKills          int    `json:"warden_kills"`
+	TotalKills           int    `json:"total_kills"`
+	Avatar               string `json:"avatar"`
+}
+
+func (con *Controller) getPlayerKillResponse(pageInt int, ranking []model.PlayerKillStats) []PlayerKillResponse {
+	var res []PlayerKillResponse
+	for i, record := range ranking {
+		res = append(res, PlayerKillResponse{
+			Ranking:              i + 1 + (pageInt-1)*20,
+			PlayerId:             record.PlayerId,
+			PlayerName:           con.service.GetNameByUUID(record.PlayerId),
+			AncientGuardianKills: record.AncientGuardianKills,
+			PhantomKills:         record.PhantomKills,
+			PiglinKills:          record.PiglinKills,
+			EnderDragonKills:     record.EnderDragonKills,
+			WitherKills:          record.WitherKills,
+			WardenKills:          record.WardenKills,
+			TotalKills:           record.AncientGuardianKills + record.PhantomKills + record.PiglinKills + record.EnderDragonKills + record.WitherKills + record.WardenKills,
+			Avatar:               con.service.GetAvatar(con.service.GetNameByUUID(record.PlayerId)),
+		})
+	}
+	return res
+}
+func (con *Controller) HandleGetPlayerKillStatsSortByTotal(c *gin.Context) {
+	page := c.Query("page")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		utils.ErrorResponse(c, 401, "invalid page number", "")
+		return
+
+	}
+	if pageInt == -1 {
+		utils.ErrorResponse(c, 401, "invalid page number", "")
+		return
+	}
+	ranking := con.service.GetPlayerKillStatsSortByTotal(pageInt)
+	res := con.getPlayerKillResponse(pageInt, ranking)
+	utils.SuccessResponse(c, "ok", res)
+}
+
 func (con *Controller) HandleGetPlayerKillStatsSortByWarden(c *gin.Context) {
 	page := c.Query("page")
 	pageInt, err := strconv.Atoi(page)
@@ -61,7 +124,8 @@ func (con *Controller) HandleGetPlayerKillStatsSortByWarden(c *gin.Context) {
 		return
 	}
 	ranking := con.service.GetPlayerKillStatsSortByWarden(pageInt)
-	utils.SuccessResponse(c, "ok", ranking)
+	res := con.getPlayerKillResponse(pageInt, ranking)
+	utils.SuccessResponse(c, "ok", res)
 }
 func (con *Controller) HandleGetPlayerKillStatsSortByEnderDragon(c *gin.Context) {
 	page := c.Query("page")
@@ -76,7 +140,8 @@ func (con *Controller) HandleGetPlayerKillStatsSortByEnderDragon(c *gin.Context)
 		return
 	}
 	ranking := con.service.GetPlayerKillStatsSortByEnderDragon(pageInt)
-	utils.SuccessResponse(c, "ok", ranking)
+	res := con.getPlayerKillResponse(pageInt, ranking)
+	utils.SuccessResponse(c, "ok", res)
 }
 func (con *Controller) HandleGetPlayerKillStatsSortByWither(c *gin.Context) {
 	page := c.Query("page")
@@ -91,7 +156,8 @@ func (con *Controller) HandleGetPlayerKillStatsSortByWither(c *gin.Context) {
 		return
 	}
 	ranking := con.service.GetPlayerKillStatsSortByWither(pageInt)
-	utils.SuccessResponse(c, "ok", ranking)
+	res := con.getPlayerKillResponse(pageInt, ranking)
+	utils.SuccessResponse(c, "ok", res)
 }
 func (con *Controller) HandleGetPlayerKillStatsSortByPiglin(c *gin.Context) {
 	page := c.Query("page")
@@ -106,7 +172,8 @@ func (con *Controller) HandleGetPlayerKillStatsSortByPiglin(c *gin.Context) {
 		return
 	}
 	ranking := con.service.GetPlayerKillStatsSortByPiglin(pageInt)
-	utils.SuccessResponse(c, "ok", ranking)
+	res := con.getPlayerKillResponse(pageInt, ranking)
+	utils.SuccessResponse(c, "ok", res)
 }
 func (con *Controller) HandleGetPlayerKillStatsSortByPhantom(c *gin.Context) {
 	page := c.Query("page")
@@ -121,7 +188,8 @@ func (con *Controller) HandleGetPlayerKillStatsSortByPhantom(c *gin.Context) {
 		return
 	}
 	ranking := con.service.GetPlayerKillStatsSortByPhantom(pageInt)
-	utils.SuccessResponse(c, "ok", ranking)
+	res := con.getPlayerKillResponse(pageInt, ranking)
+	utils.SuccessResponse(c, "ok", res)
 }
 func (con *Controller) HandleGetPlayerKillStatsSortByAncientGuardian(c *gin.Context) {
 	page := c.Query("page")
@@ -136,7 +204,8 @@ func (con *Controller) HandleGetPlayerKillStatsSortByAncientGuardian(c *gin.Cont
 		return
 	}
 	ranking := con.service.GetPlayerKillStatsSortByAncientGuardian(pageInt)
-	utils.SuccessResponse(c, "ok", ranking)
+	res := con.getPlayerKillResponse(pageInt, ranking)
+	utils.SuccessResponse(c, "ok", res)
 }
 func (con *Controller) HandleGetFishAmount(c *gin.Context) {
 	err, records := con.service.GetDecodedFishData()

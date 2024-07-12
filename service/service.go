@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"sushi/model"
 	"sushi/utils/DB"
 	"sushi/utils/config"
@@ -32,6 +33,11 @@ func (service *Service) GetBalance(uuid string) float32 {
 func (service *Service) GetBalanceRanking(page int) []model.Xconomy {
 	var record []model.Xconomy
 	service.db.DB.Model(&record).Order("balance desc").Offset((page - 1) * 20).Limit(20).Find(&record)
+	return record
+}
+func (service *Service) GetPlayerKillStatsSortByTotal(page int) []model.PlayerKillStats {
+	var record []model.PlayerKillStats
+	service.db.DB.Model(&record).Order(gorm.Expr("warden_kills + ender_dragon_kills + wither_kills + piglin_kills + phantom_kills + ancient_guardian_kills DESC")).Offset((page - 1) * 20).Limit(20).Find(&record)
 	return record
 }
 func (service *Service) GetPlayerKillStatsSortByWarden(page int) []model.PlayerKillStats {
@@ -152,4 +158,8 @@ func (service *Service) GetPlayerProfileByName(name string) model.PlayerProfile 
 	record.FishData = *decodedFishData
 	record.UUID = uuid
 	return record
+}
+
+func (service *Service) GetAvatar(name string) string {
+	return "https://minotar.net/helm/" + name + "/100.png"
 }

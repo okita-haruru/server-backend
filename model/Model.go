@@ -45,3 +45,8 @@ type PlayerProfile struct {
 	KillStats PlayerKillStats
 	Xconomy   Xconomy
 }
+type PlayerInfo struct {
+	Uuid   string `json:"uuid"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
+}
