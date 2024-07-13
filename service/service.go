@@ -80,9 +80,9 @@ func (service *Service) GetPlayerKillStats() []model.PlayerKillStats {
 	service.db.DB.Model(&record).Find(&record)
 	return record
 }
-func (service *Service) GetOnlineTime(page int) []model.OnlineTime {
-	var record []model.OnlineTime
-	service.db.DB.Model(&record).Order("time desc").Offset((page - 1) * 20).Limit(20).Find(&record)
+func (service *Service) GetPlayTime(page int) []model.PlayTime {
+	var record []model.PlayTime
+	service.db.DB.Model(&record).Order("play_time desc").Offset((page - 1) * 20).Limit(20).Find(&record)
 	return record
 }
 

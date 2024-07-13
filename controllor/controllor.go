@@ -75,10 +75,13 @@ type PlayerKillResponse struct {
 	Avatar               string `json:"avatar"`
 }
 
-type OnlineTimeResponse struct {
+type PlayTimeResponse struct {
 	Ranking    int    `json:"ranking"`
+	UUID       string `json:"uuid"`
 	PlayerName string `json:"player_name"`
-	OnlineTime int    `json:"online_time"`
+	FirstLogin string `json:"first_login"`
+	PlayTime   string `json:"play_time"`
+	LastLogin  string `json:"last_login"`
 }
 
 func (con *Controller) getPlayerKillResponse(pageInt int, ranking []model.PlayerKillStats) []PlayerKillResponse {
@@ -100,7 +103,13 @@ func (con *Controller) getPlayerKillResponse(pageInt int, ranking []model.Player
 	}
 	return res
 }
-func (con *Controller) HandleGetOnlineTime(c *gin.Context) {
+func formatTime(time int) string {
+	hour := time / 3600
+	minute := (time % 3600) / 60
+	second := time % 60
+	return strconv.Itoa(hour) + "小时 " + strconv.Itoa(minute) + "分钟 " + strconv.Itoa(second) + "秒"
+}
+func (con *Controller) HandleGetPlayTime(c *gin.Context) {
 	page := c.Query("page")
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
@@ -112,10 +121,17 @@ func (con *Controller) HandleGetOnlineTime(c *gin.Context) {
 		utils.ErrorResponse(c, 401, "invalid page number", "")
 		return
 	}
-	ranking := con.service.GetOnlineTime(pageInt)
-	var res []OnlineTimeResponse
+	ranking := con.service.GetPlayTime(pageInt)
+	var res []PlayTimeResponse
 	for i, record := range ranking {
-		res = append(res, OnlineTimeResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: record.Name, OnlineTime: record.Time})
+		res = append(res, PlayTimeResponse{
+			Ranking:    i + 1 + (pageInt-1)*20,
+			PlayerName: record.Name,
+			UUID:       record.UUID,
+			FirstLogin: record.FirstLogin.Format("2006-01-02 15:04:05"),
+			PlayTime:   formatTime(record.PlayTime),
+			LastLogin:  record.LastLogin.Format("2006-01-02 15:04:05"),
+		})
 	}
 	utils.SuccessResponse(c, "ok", res)
 }

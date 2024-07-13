@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type PlayerKillStats struct {
 	PlayerId             string `gorm:"primaryKey"`
 	AncientGuardianKills int    `gorm:"default:0"`
@@ -50,12 +52,14 @@ type PlayerInfo struct {
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
 }
-type OnlineTime struct {
-	UUID string `gorm:"primaryKey" json:"uuid"`
-	Name string `json:"name"`
-	Time int    `json:"time"`
+type PlayTime struct {
+	UUID       string    `gorm:"primaryKey" json:"uuid"`
+	Name       string    `json:"name"`
+	FirstLogin time.Time `json:"first_login"`
+	PlayTime   int       `json:"play_time"`
+	LastLogin  time.Time `json:"last_login"`
 }
 
-func (OnlineTime) TableName() string {
-	return "BungeeOnlineTime"
+func (PlayTime) TableName() string {
+	return "play_time"
 }
