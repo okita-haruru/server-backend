@@ -82,6 +82,7 @@ type PlayTimeResponse struct {
 	FirstLogin string `json:"first_login"`
 	PlayTime   string `json:"play_time"`
 	LastLogin  string `json:"last_login"`
+	Avatar     string `json:"avatar"`
 }
 
 func (con *Controller) getPlayerKillResponse(pageInt int, ranking []model.PlayerKillStats) []PlayerKillResponse {
@@ -131,6 +132,7 @@ func (con *Controller) HandleGetPlayTime(c *gin.Context) {
 			FirstLogin: record.FirstLogin.Format("2006-01-02 15:04:05"),
 			PlayTime:   formatTime(record.PlayTime),
 			LastLogin:  record.LastLogin.Format("2006-01-02 15:04:05"),
+			Avatar:     con.service.GetAvatar(record.Name),
 		})
 	}
 	utils.SuccessResponse(c, "ok", res)
