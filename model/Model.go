@@ -50,3 +50,12 @@ type PlayerInfo struct {
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
 }
+type OnlineTime struct {
+	UUID string `gorm:"primaryKey" json:"uuid"`
+	Name string `json:"name"`
+	Time int    `json:"time"`
+}
+
+func (OnlineTime) TableName() string {
+	return "BungeeOnlineTime"
+}
