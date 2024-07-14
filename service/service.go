@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"sort"
 	"sushi/model"
 	"sushi/utils/DB"
 	"sushi/utils/config"
@@ -37,7 +38,7 @@ func (service *Service) GetBalanceRanking(page int) []model.Xconomy {
 }
 func (service *Service) GetPlayerKillStatsSortByTotal(page int) []model.PlayerKillStats {
 	var record []model.PlayerKillStats
-	service.db.DB.Model(&record).Order(gorm.Expr("warden_kills + ender_dragon_kills + wither_kills + piglin_kills + phantom_kills + ancient_guardian_kills DESC")).Offset((page - 1) * 20).Limit(20).Find(&record)
+	service.db.DB.Model(&record).Order(gorm.Expr("warden_kills + ender_dragon_kills + wither_kills + piglin_kills + phantom_kills + ancient_guardian_kills desc")).Offset((page - 1) * 20).Limit(20).Find(&record)
 	return record
 }
 func (service *Service) GetPlayerKillStatsSortByWarden(page int) []model.PlayerKillStats {
@@ -106,15 +107,13 @@ type Trade struct {
 }
 
 func (service *Service) decodeFishData(data model.CustomfishingData) (error, *model.CustomfishingDataDecoded) {
-	var record model.CustomfishingData
-	service.db.DB.Model(&record).Where("uuid = ?", data.Uuid).First(&record)
 	var playerfishdata PlayerFishData
-	err := json.Unmarshal([]byte(record.Data), &playerfishdata)
+	err := json.Unmarshal([]byte(data.Data), &playerfishdata)
 	if err != nil {
 		return err, nil
 	}
 	decodedRecord := model.CustomfishingDataDecoded{
-		Uuid:    record.Uuid,
+		Uuid:    data.Uuid,
 		Amount:  playerfishdata.Stats.Amount,
 		MaxSize: playerfishdata.Stats.Size,
 	}
@@ -125,7 +124,7 @@ func (service *Service) getFishData() []model.CustomfishingData {
 	service.db.DB.Model(&record).Find(&record)
 	return record
 }
-func (service *Service) GetDecodedFishData() (error, []model.CustomfishingDataDecoded) {
+func (service *Service) getDecodedFishData() (error, []model.CustomfishingDataDecoded) {
 	record := service.getFishData()
 	var decodedRecords []model.CustomfishingDataDecoded
 	for _, data := range record {
@@ -136,6 +135,69 @@ func (service *Service) GetDecodedFishData() (error, []model.CustomfishingDataDe
 		decodedRecords = append(decodedRecords, *decodedRecord)
 	}
 	return nil, decodedRecords
+}
+
+func (service *Service) sortFishDataByAmount(fish string) (error, []model.CustomfishingDataDecoded) {
+	err, records := service.getDecodedFishData()
+	if err != nil {
+		return err, nil
+	}
+	sort.Slice(records, func(i, j int) bool {
+		return records[i].Amount[fish] < records[j].Amount[fish]
+	})
+	return nil, records
+}
+
+func (service *Service) GetTotalAmount(record model.CustomfishingDataDecoded) int {
+	var totalAmount int
+	for _, amount := range record.Amount {
+		totalAmount += amount
+	}
+	return totalAmount
+}
+
+func (service *Service) sortFishDataByTotalAmount() (error, []model.CustomfishingDataDecoded) {
+	err, records := service.getDecodedFishData()
+	if err != nil {
+		return err, nil
+	}
+	sort.Slice(records, func(i, j int) bool {
+		return service.GetTotalAmount(records[i]) < service.GetTotalAmount(records[j])
+	})
+	return nil, records
+}
+
+func (service *Service) sortFishDataBySize(fish string) (error, []model.CustomfishingDataDecoded) {
+	err, records := service.getDecodedFishData()
+	if err != nil {
+		return err, nil
+	}
+	sort.Slice(records, func(i, j int) bool {
+		return records[i].MaxSize[fish] < records[j].MaxSize[fish]
+	})
+	return nil, records
+
+}
+func (service *Service) GetFishRankingByAmount(fish string, page int) (error, []model.CustomfishingDataDecoded) {
+	err, records := service.sortFishDataByAmount(fish)
+	if err != nil {
+		return err, nil
+	}
+	return nil, records[1+(page-1)*20 : 20*page]
+}
+func (service *Service) GetFishRankingByTotalAmount(page int) (error, []model.CustomfishingDataDecoded) {
+	err, records := service.sortFishDataByTotalAmount()
+	if err != nil {
+		return err, nil
+	}
+	return nil, records[1+(page-1)*20 : 20*page]
+}
+func (service *Service) GetFishRankingBySize(fish string, page int) (error, []model.CustomfishingDataDecoded) {
+	err, records := service.sortFishDataBySize(fish)
+	if err != nil {
+		return err, nil
+	}
+	return nil, records[1+(page-1)*20 : 20*page]
 }
 func (service *Service) GetNameByUUID(uuid string) string {
 	var record model.Xconomy

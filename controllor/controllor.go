@@ -84,6 +84,20 @@ type PlayTimeResponse struct {
 	LastLogin  string `json:"last_login"`
 	Avatar     string `json:"avatar"`
 }
+type FishAmountRankingResponse struct {
+	Ranking    int    `json:"ranking"`
+	PlayerName string `json:"player_name"`
+	UUID       string `json:"uuid"`
+	FishName   string `json:"fish_name"`
+	Amount     int    `json:"amount"`
+}
+type FishSizeRankingResponse struct {
+	Ranking    int     `json:"ranking"`
+	PlayerName string  `json:"player_name"`
+	UUID       string  `json:"uuid"`
+	FishName   string  `json:"fish_name"`
+	Size       float32 `json:"size"`
+}
 
 func (con *Controller) getPlayerKillResponse(pageInt int, ranking []model.PlayerKillStats) []PlayerKillResponse {
 	var res []PlayerKillResponse
@@ -250,29 +264,63 @@ func (con *Controller) HandleGetPlayerKillStatsSortByAncientGuardian(c *gin.Cont
 	res := con.getPlayerKillResponse(pageInt, ranking)
 	utils.SuccessResponse(c, "ok", res)
 }
-func (con *Controller) HandleGetFishAmount(c *gin.Context) {
-	err, records := con.service.GetDecodedFishData()
+func (con *Controller) HandleGetFishRankingByAmount(c *gin.Context) {
+	fish := c.Query("fish")
+	page := c.Query("page")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		utils.ErrorResponse(c, 401, "invalid page number", "")
+		return
+
+	}
+	err, records := con.service.GetFishRankingByAmount(fish, pageInt)
 	if err != nil {
 		utils.ErrorResponse(c, 401, "error getting fish data", "")
 		return
 	}
-	var fishAmountData []model.FishAmountData
-	for _, record := range records {
-		fishAmountData = append(fishAmountData, model.FishAmountData{Uuid: record.Uuid, Amount: record.Amount})
+	var res []FishAmountRankingResponse
+	for i, record := range records {
+		res = append(res, FishAmountRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: fish, Amount: record.Amount[fish]})
 	}
-	utils.SuccessResponse(c, "ok", fishAmountData)
+	utils.SuccessResponse(c, "ok", res)
 }
-func (con *Controller) HandleGetFishSize(c *gin.Context) {
-	err, records := con.service.GetDecodedFishData()
+func (con *Controller) HandleGetFishRankingByTotalAmount(c *gin.Context) {
+	page := c.Query("page")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		utils.ErrorResponse(c, 401, "invalid page number", "")
+		return
+	}
+	err, records := con.service.GetFishRankingByTotalAmount(pageInt)
 	if err != nil {
 		utils.ErrorResponse(c, 401, "error getting fish data", "")
 		return
 	}
-	var fishSizeData []model.FishSizeData
-	for _, record := range records {
-		fishSizeData = append(fishSizeData, model.FishSizeData{Uuid: record.Uuid, MaxSize: record.MaxSize})
+	var res []FishAmountRankingResponse
+	for i, record := range records {
+		res = append(res, FishAmountRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: "", Amount: con.service.GetTotalAmount(record)})
 	}
-	utils.SuccessResponse(c, "ok", fishSizeData)
+	utils.SuccessResponse(c, "ok", res)
+}
+func (con *Controller) HandleGetFishRankingBySize(c *gin.Context) {
+	fish := c.Query("fish")
+	page := c.Query("page")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		utils.ErrorResponse(c, 401, "invalid page number", "")
+		return
+
+	}
+	err, records := con.service.GetFishRankingBySize(fish, pageInt)
+	if err != nil {
+		utils.ErrorResponse(c, 401, "error getting fish data", "")
+		return
+	}
+	var res []FishSizeRankingResponse
+	for i, record := range records {
+		res = append(res, FishSizeRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: fish, Size: record.MaxSize[fish]})
+	}
+	utils.SuccessResponse(c, "ok", res)
 }
 func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 	resp, err := http.Get("http://localhost:25577/api/players")
