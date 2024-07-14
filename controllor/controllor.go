@@ -90,6 +90,7 @@ type FishAmountRankingResponse struct {
 	UUID       string `json:"uuid"`
 	FishName   string `json:"fish_name"`
 	Amount     int    `json:"amount"`
+	Avatar     string `json:"avatar"`
 }
 type FishSizeRankingResponse struct {
 	Ranking    int     `json:"ranking"`
@@ -97,6 +98,7 @@ type FishSizeRankingResponse struct {
 	UUID       string  `json:"uuid"`
 	FishName   string  `json:"fish_name"`
 	Size       float32 `json:"size"`
+	Avatar     string  `json:"avatar"`
 }
 
 func (con *Controller) getPlayerKillResponse(pageInt int, ranking []model.PlayerKillStats) []PlayerKillResponse {
@@ -279,7 +281,7 @@ func (con *Controller) HandleGetFishRankingByAmount(c *gin.Context) {
 	}
 	var res []FishAmountRankingResponse
 	for i, record := range records {
-		res = append(res, FishAmountRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: fish, Amount: record.Amount[fish]})
+		res = append(res, FishAmountRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: fish, Amount: record.Amount[fish], Avatar: con.service.GetAvatar(con.service.GetNameByUUID(record.Uuid))})
 	}
 	utils.SuccessResponse(c, "ok", res)
 }
@@ -297,7 +299,7 @@ func (con *Controller) HandleGetFishRankingByTotalAmount(c *gin.Context) {
 	}
 	var res []FishAmountRankingResponse
 	for i, record := range records {
-		res = append(res, FishAmountRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: "", Amount: con.service.GetTotalAmount(record)})
+		res = append(res, FishAmountRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: "", Amount: con.service.GetTotalAmount(record), Avatar: con.service.GetAvatar(con.service.GetNameByUUID(record.Uuid))})
 	}
 	utils.SuccessResponse(c, "ok", res)
 }
@@ -317,7 +319,7 @@ func (con *Controller) HandleGetFishRankingBySize(c *gin.Context) {
 	}
 	var res []FishSizeRankingResponse
 	for i, record := range records {
-		res = append(res, FishSizeRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: fish, Size: record.MaxSize[fish]})
+		res = append(res, FishSizeRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: fish, Size: record.MaxSize[fish], Avatar: con.service.GetAvatar(con.service.GetNameByUUID(record.Uuid))})
 	}
 	utils.SuccessResponse(c, "ok", res)
 }
