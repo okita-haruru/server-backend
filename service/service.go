@@ -143,7 +143,7 @@ func (service *Service) sortFishDataByAmount(fish string) (error, []model.Custom
 		return err, nil
 	}
 	sort.Slice(records, func(i, j int) bool {
-		return records[i].Amount[fish] < records[j].Amount[fish]
+		return records[i].Amount[fish] > records[j].Amount[fish]
 	})
 	return nil, records
 }
@@ -162,7 +162,7 @@ func (service *Service) sortFishDataByTotalAmount() (error, []model.Customfishin
 		return err, nil
 	}
 	sort.Slice(records, func(i, j int) bool {
-		return service.GetTotalAmount(records[i]) < service.GetTotalAmount(records[j])
+		return service.GetTotalAmount(records[i]) > service.GetTotalAmount(records[j])
 	})
 	return nil, records
 }
@@ -173,7 +173,7 @@ func (service *Service) sortFishDataBySize(fish string) (error, []model.Customfi
 		return err, nil
 	}
 	sort.Slice(records, func(i, j int) bool {
-		return records[i].MaxSize[fish] < records[j].MaxSize[fish]
+		return records[i].MaxSize[fish] > records[j].MaxSize[fish]
 	})
 	return nil, records
 
@@ -183,21 +183,21 @@ func (service *Service) GetFishRankingByAmount(fish string, page int) (error, []
 	if err != nil {
 		return err, nil
 	}
-	return nil, records[1+(page-1)*20 : 20*page]
+	return nil, records[(page-1)*20 : min(20*page-1, len(records))]
 }
 func (service *Service) GetFishRankingByTotalAmount(page int) (error, []model.CustomfishingDataDecoded) {
 	err, records := service.sortFishDataByTotalAmount()
 	if err != nil {
 		return err, nil
 	}
-	return nil, records[1+(page-1)*20 : 20*page]
+	return nil, records[(page-1)*20 : min(20*page-1, len(records))]
 }
 func (service *Service) GetFishRankingBySize(fish string, page int) (error, []model.CustomfishingDataDecoded) {
 	err, records := service.sortFishDataBySize(fish)
 	if err != nil {
 		return err, nil
 	}
-	return nil, records[1+(page-1)*20 : 20*page]
+	return nil, records[(page-1)*20 : min(20*page-1, len(records))]
 }
 func (service *Service) GetNameByUUID(uuid string) string {
 	var record model.Xconomy

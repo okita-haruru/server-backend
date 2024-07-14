@@ -271,7 +271,6 @@ func (con *Controller) HandleGetFishRankingByAmount(c *gin.Context) {
 	if err != nil {
 		utils.ErrorResponse(c, 401, "invalid page number", "")
 		return
-
 	}
 	err, records := con.service.GetFishRankingByAmount(fish, pageInt)
 	if err != nil {
