@@ -19,7 +19,7 @@ func NewDB_MySQL(log *logrus.Logger, DBPath string) *DB {
 
 	_db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		fmt.Println("connection error: " + err.Error())
+		log.Fatal("failed to connect database")
 	}
 
 	sqlDB, _ := _db.DB()
