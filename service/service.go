@@ -193,6 +193,12 @@ func (service *Service) GetFishRankingByAmount(fish string, page int) (error, []
 	if err != nil {
 		return err, nil
 	}
+	for i, record := range records {
+		if record.Amount[fish] == 0 {
+			records = append(records[:i], records[i+1:]...)
+		}
+
+	}
 	return nil, records[(page-1)*20 : min(20*page-1, len(records))]
 }
 func (service *Service) GetFishRankingByTotalAmount(page int) (error, []model.CustomfishingDataDecoded) {
@@ -200,12 +206,22 @@ func (service *Service) GetFishRankingByTotalAmount(page int) (error, []model.Cu
 	if err != nil {
 		return err, nil
 	}
+	for i, record := range records {
+		if service.GetTotalAmount(record) == 0 {
+			records = append(records[:i], records[i+1:]...)
+		}
+	}
 	return nil, records[(page-1)*20 : min(20*page-1, len(records))]
 }
 func (service *Service) GetFishRankingBySize(fish string, page int) (error, []model.CustomfishingDataDecoded) {
 	err, records := service.sortFishDataBySize(fish)
 	if err != nil {
 		return err, nil
+	}
+	for i, record := range records {
+		if record.MaxSize[fish] == 0 {
+			records = append(records[:i], records[i+1:]...)
+		}
 	}
 	return nil, records[(page-1)*20 : min(20*page-1, len(records))]
 }
