@@ -1,9 +1,14 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"github.com/sirupsen/logrus"
+	"io"
+	"os"
 	"sort"
 	"sushi/model"
 	"sushi/utils/DB"
@@ -234,4 +239,46 @@ func (service *Service) GetPlayerProfileByName(name string) model.PlayerProfile 
 
 func (service *Service) GetAvatar(name string) string {
 	return "https://minotar.net/helm/" + name + "/100.png"
+}
+
+type Fish struct {
+	Name string `json:"name"`
+	Key  string `json:"key"`
+}
+
+func (service *Service) GetFish() ([]Fish, error) {
+	var fishes []Fish
+
+	file, err := os.ReadFile("new.csv")
+	if err != nil {
+		fmt.Println(err)
+	}
+	//解决读取csv中文乱码的问题
+	//reader := csv.NewReader(transform.NewReader(bytes.NewReader(file), simplifiedchinese.GBK.NewDecoder()))
+
+	reader := csv.NewReader(bytes.NewReader(file))
+	s, err := reader.Read()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(s)
+
+	for {
+		csvdata, err := reader.Read() // 按行读取数据,可控制读取部分
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Println("Error:", err.Error())
+			return nil, err
+		}
+
+		if csvdata[0] != "" && csvdata[3] != "" {
+			fishes = append(fishes, Fish{
+				Name: csvdata[0],
+				Key:  csvdata[3],
+			})
+		}
+	}
+	return fishes, nil
 }

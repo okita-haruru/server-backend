@@ -354,3 +354,12 @@ func (con *Controller) HandleGetPlayerProfileByName(c *gin.Context) {
 	profile := con.service.GetPlayerProfileByName(name)
 	utils.SuccessResponse(c, "ok", profile)
 }
+
+func (con *Controller) HandleGetFish(c *gin.Context) {
+	fishes, err := con.service.GetFish()
+	if err != nil {
+		utils.ErrorResponse(c, 401, "error getting fish data", err.Error())
+		return
+	}
+	utils.SuccessResponse(c, "ok", fishes)
+}
