@@ -332,6 +332,15 @@ func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 	var response PlayerListResponse
 	body, err := ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(body, &response)
+	if err != nil {
+		utils.ErrorResponse(c, 401, "error getting player list", "")
+	}
+	for i, player := range response.Lobby.Players {
+		response.Lobby.Players[i].Avatar = con.service.GetAvatar(player.Name)
+	}
+	for i, player := range response.Survival.Players {
+		response.Survival.Players[i].Avatar = con.service.GetAvatar(player.Name)
+	}
 	utils.SuccessResponse(c, "ok", response)
 }
 
@@ -344,9 +353,10 @@ type RoomJson struct {
 	Count   int          `json:"count"`
 }
 type PlayerJson struct {
-	Ping int    `json:"ping"`
-	Name string `json:"name"`
-	UUID string `json:"uuid"`
+	Ping   int    `json:"ping"`
+	Name   string `json:"name"`
+	UUID   string `json:"uuid"`
+	Avatar string `json:"avatar"`
 }
 
 func (con *Controller) HandleGetPlayerProfileByName(c *gin.Context) {
