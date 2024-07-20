@@ -363,3 +363,7 @@ func (con *Controller) HandleGetFish(c *gin.Context) {
 	}
 	utils.SuccessResponse(c, "ok", fishes)
 }
+func (con *Controller) HandleGetLoginRecordCountByDate(c *gin.Context) {
+	count := con.service.GetLoginRecordCountByDate()
+	utils.SuccessResponse(c, "ok", count)
+}

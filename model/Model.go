@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type PlayerKillStats struct {
 	PlayerId             string `gorm:"primaryKey"`
@@ -58,6 +60,16 @@ type PlayTime struct {
 	FirstLogin time.Time `json:"first_login"`
 	PlayTime   int       `json:"play_time"`
 	LastLogin  time.Time `json:"last_login"`
+}
+
+type LoginRecord struct {
+	UUID      string `gorm:"primaryKey"`
+	Name      string
+	LoginTime time.Time `gorm:"type:date"`
+}
+
+func (LoginRecord) TableName() string {
+	return "login_record"
 }
 
 func (PlayTime) TableName() string {

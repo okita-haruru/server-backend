@@ -298,3 +298,15 @@ func (service *Service) GetFish() ([]Fish, error) {
 	}
 	return fishes, nil
 }
+
+type LoginRecordCount struct {
+	LoginTime string `json:"login_time"`
+	Count     int    `json:"count"`
+}
+
+func (service *Service) GetLoginRecordCountByDate() []LoginRecordCount {
+	var record []model.LoginRecord
+	var recordCount []LoginRecordCount
+	service.db.DB.Model(&record).Select("login_time, count(*) as count").Group("login_time").Find(&recordCount)
+	return recordCount
+}

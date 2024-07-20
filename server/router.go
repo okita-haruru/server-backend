@@ -20,6 +20,7 @@ func NewRouter(server *Server, conf config.Config, socketserver *socketio.Server
 	r.GET("/ping", server.controller.HandlePing)
 	r.GET("/player_list", server.controller.HandleGetPlayerList)
 	r.GET("/fish", server.controller.HandleGetFish)
+	r.GET("/login_count", server.controller.HandleGetLoginRecordCountByDate)
 	r.GET("/ranking/balance", server.controller.HandleGetBalanceRanking)
 	r.GET("/ranking/play_time", server.controller.HandleGetPlayTime)
 	r.GET("/ranking/kills/total", server.controller.HandleGetPlayerKillStatsSortByTotal)
