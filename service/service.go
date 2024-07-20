@@ -194,13 +194,13 @@ func (service *Service) GetFishRankingByAmount(fish string, page int) (error, []
 	if err != nil {
 		return err, nil
 	}
-	for i, record := range records {
-		if record.Amount[fish] == 0 {
-			records = append(records[:i], records[i+1:]...)
+	var newRecords []model.CustomfishingDataDecoded
+	for _, record := range records {
+		if record.MaxSize[fish] != 0 {
+			newRecords = append(newRecords, record)
 		}
-
 	}
-	return nil, records[(page-1)*20 : min(20*page-1, len(records))]
+	return nil, newRecords[(page-1)*20 : min(20*page-1, len(newRecords))]
 }
 func (service *Service) GetFishRankingByTotalAmount(page int) (error, []model.CustomfishingDataDecoded) {
 	err, records := service.sortFishDataByTotalAmount()
@@ -219,12 +219,13 @@ func (service *Service) GetFishRankingBySize(fish string, page int) (error, []mo
 	if err != nil {
 		return err, nil
 	}
-	for i, record := range records {
-		if record.MaxSize[fish] == 0 {
-			records = append(records[:i], records[i+1:]...)
+	var newRecords []model.CustomfishingDataDecoded
+	for _, record := range records {
+		if record.MaxSize[fish] != 0 {
+			newRecords = append(newRecords, record)
 		}
 	}
-	return nil, records[(page-1)*20 : min(20*page-1, len(records))]
+	return nil, newRecords[(page-1)*20 : min(20*page-1, len(newRecords))]
 }
 func (service *Service) GetNameByUUID(uuid string) string {
 	var record model.Xconomy
@@ -274,12 +275,7 @@ func (service *Service) GetFish() ([]Fish, error) {
 	//reader := csv.NewReader(transform.NewReader(bytes.NewReader(file), simplifiedchinese.GBK.NewDecoder()))
 
 	reader := csv.NewReader(bytes.NewReader(file))
-	s, err := reader.Read()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(s)
-
+	reader.Read()
 	for {
 		csvdata, err := reader.Read() // 按行读取数据,可控制读取部分
 		if err == io.EOF {
