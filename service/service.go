@@ -313,7 +313,8 @@ func (service *Service) GetLoginRecordCountByDate() []LoginRecordRes {
 	var record []model.LoginRecord
 	var recordCount []LoginRecordCount
 	var recordRes []LoginRecordRes
-	service.db.DB.Model(&record).Select("login_time, count(*) as count").Group("login_time").Find(&recordCount)
+	service.db.DB.Model(&record).Select("login_time, count(*) as count").Group("login_time").Order("login_time").Find(&recordCount)
+	fmt.Println(recordCount)
 	for _, v := range recordCount {
 		recordRes = append(recordRes, LoginRecordRes{
 			LoginTime: v.LoginTime.Format("2006-01-02"),
