@@ -309,7 +309,7 @@ type LoginRecordRes struct {
 	Count     int    `json:"count"`
 }
 
-func (service *Service) GetLoginRecordCountByDate() []LoginRecordCount {
+func (service *Service) GetLoginRecordCountByDate() []LoginRecordRes {
 	var record []model.LoginRecord
 	var recordCount []LoginRecordCount
 	var recordRes []LoginRecordRes
@@ -320,5 +320,5 @@ func (service *Service) GetLoginRecordCountByDate() []LoginRecordCount {
 			Count:     v.Count,
 		})
 	}
-	return recordCount
+	return recordRes
 }
