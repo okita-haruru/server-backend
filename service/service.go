@@ -13,6 +13,7 @@ import (
 	"sushi/model"
 	"sushi/utils/DB"
 	"sushi/utils/config"
+	"time"
 )
 
 type Service struct {
@@ -300,6 +301,10 @@ func (service *Service) GetFish() ([]Fish, error) {
 }
 
 type LoginRecordCount struct {
+	LoginTime time.Time `json:"login_time"`
+	Count     int       `json:"count"`
+}
+type LoginRecordRes struct {
 	LoginTime string `json:"login_time"`
 	Count     int    `json:"count"`
 }
@@ -307,6 +312,13 @@ type LoginRecordCount struct {
 func (service *Service) GetLoginRecordCountByDate() []LoginRecordCount {
 	var record []model.LoginRecord
 	var recordCount []LoginRecordCount
+	var recordRes []LoginRecordRes
 	service.db.DB.Model(&record).Select("login_time, count(*) as count").Group("login_time").Find(&recordCount)
+	for _, v := range recordCount {
+		recordRes = append(recordRes, LoginRecordRes{
+			LoginTime: v.LoginTime.Format("2006-01-02"),
+			Count:     v.Count,
+		})
+	}
 	return recordCount
 }
