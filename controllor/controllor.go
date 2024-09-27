@@ -2,6 +2,7 @@ package controllor
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -292,15 +293,18 @@ func (con *Controller) HandleGetFishRankingByTotalAmount(c *gin.Context) {
 		utils.ErrorResponse(c, 401, "invalid page number", "")
 		return
 	}
+	fmt.Println("done1")
 	err, records := con.service.GetFishRankingByTotalAmount(pageInt)
 	if err != nil {
 		utils.ErrorResponse(c, 401, "error getting fish data", "")
 		return
 	}
+	fmt.Println("done2")
 	var res []FishAmountRankingResponse
 	for i, record := range records {
 		res = append(res, FishAmountRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: "", Amount: con.service.GetTotalAmount(record), Avatar: con.service.GetAvatar(con.service.GetNameByUUID(record.Uuid))})
 	}
+	fmt.Println("done3")
 	utils.SuccessResponse(c, "ok", res)
 }
 func (con *Controller) HandleGetFishRankingBySize(c *gin.Context) {
