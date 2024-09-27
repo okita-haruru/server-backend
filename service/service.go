@@ -312,12 +312,29 @@ func (service *Service) GetLoginRecordCountByDate() []LoginRecordRes {
 	var recordCount []LoginRecordCount
 	var recordRes []LoginRecordRes
 	service.db.DB.Model(&record).Select("login_time, count(*) as count").Group("login_time").Order("login_time").Find(&recordCount)
-	fmt.Println(recordCount)
+
+	// 创建一个map，以便于快速查找日期
+	recordCountMap := make(map[string]int)
 	for _, v := range recordCount {
+		recordCountMap[v.LoginTime.Format("2006-01-02")] = v.Count
+	}
+
+	// 获取日期范围
+	startDate := recordCount[0].LoginTime
+	endDate := recordCount[len(recordCount)-1].LoginTime
+
+	// 遍历日期范围
+	for d := startDate; d.Before(endDate) || d.Equal(endDate); d = d.AddDate(0, 0, 1) {
+		dateStr := d.Format("2006-01-02")
+		count, exists := recordCountMap[dateStr]
+		if !exists {
+			count = 0
+		}
 		recordRes = append(recordRes, LoginRecordRes{
-			LoginTime: v.LoginTime.Format("2006-01-02"),
-			Count:     v.Count,
+			LoginTime: dateStr,
+			Count:     count,
 		})
 	}
+
 	return recordRes
 }
