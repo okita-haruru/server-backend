@@ -331,6 +331,7 @@ func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 	resp, err := http.Get("http://localhost:25577/api/players")
 	if err != nil {
 		utils.ErrorResponse(c, 501, "game server gg", "")
+		return
 	}
 
 	defer resp.Body.Close()
@@ -340,12 +341,15 @@ func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 
 	if err != nil {
 		utils.ErrorResponse(c, 401, "error getting player list", "")
+		return
 	}
 	for i, player := range response.Lobby.Players {
 		response.Lobby.Players[i].Avatar = con.service.GetAvatar(player.Name)
+		return
 	}
 	for i, player := range response.Survival.Players {
 		response.Survival.Players[i].Avatar = con.service.GetAvatar(player.Name)
+		return
 	}
 	utils.SuccessResponse(c, "ok", response)
 }
