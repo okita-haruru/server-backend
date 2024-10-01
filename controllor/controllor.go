@@ -330,12 +330,14 @@ func (con *Controller) HandleGetFishRankingBySize(c *gin.Context) {
 func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 	resp, err := http.Get("http://localhost:25577/api/players")
 	if err != nil {
-		utils.ErrorResponse(c, 401, "error getting player list", "")
+		utils.ErrorResponse(c, 501, "game server gg", "")
 	}
+
 	defer resp.Body.Close()
 	var response PlayerListResponse
 	body, err := ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(body, &response)
+
 	if err != nil {
 		utils.ErrorResponse(c, 401, "error getting player list", "")
 	}
