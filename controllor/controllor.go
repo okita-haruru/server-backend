@@ -345,11 +345,9 @@ func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 	}
 	for i, player := range response.Lobby.Players {
 		response.Lobby.Players[i].Avatar = con.service.GetAvatar(player.Name)
-		return
 	}
 	for i, player := range response.Survival.Players {
 		response.Survival.Players[i].Avatar = con.service.GetAvatar(player.Name)
-		return
 	}
 	utils.SuccessResponse(c, "ok", response)
 }
