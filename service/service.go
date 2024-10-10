@@ -208,12 +208,13 @@ func (service *Service) GetFishRankingByTotalAmount(page int) (error, []model.Cu
 		return err, nil
 	}
 	for i, record := range records {
+		fmt.Println(record)
+		fmt.Println(service.GetTotalAmount(record))
 		if service.GetTotalAmount(record) == 0 {
-			records = records[:i-1]
+			records = records[:i]
 		}
 	}
 	fmt.Println(len(records))
-	fmt.Println(records)
 	return nil, records[(page-1)*20 : min(20*page-1, len(records))]
 }
 func (service *Service) GetFishRankingBySize(fish string, page int) (error, []model.CustomfishingDataDecoded) {
