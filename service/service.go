@@ -212,6 +212,7 @@ func (service *Service) GetFishRankingByTotalAmount(page int) (error, []model.Cu
 		fmt.Println(service.GetTotalAmount(record))
 		if service.GetTotalAmount(record) == 0 {
 			records = records[:i]
+			break
 		}
 	}
 	fmt.Println(len(records))
