@@ -167,7 +167,7 @@ func (service *Service) GetPlayerBalanceRanking(uuid string) model.RankingFloat 
 func (service *Service) GetPlayerDeathRanking(uuid string) model.RankingInt {
 	//get ranking of one player by death
 	var count int64
-	service.db.DB.Model(&model.PlayerDeathStats{}).Where("death_count > (select death_count from player_death_stats where uuid = ?)", uuid).Count(&count)
+	service.db.DB.Model(&model.PlayerDeathStats{}).Where("death_count > (select death_count from player_death_stats where player_id = ?)", uuid).Count(&count)
 	return model.RankingInt{
 		Rank:  int(count) + 1,
 		Value: service.GetDeathCount(uuid),
