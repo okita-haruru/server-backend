@@ -24,9 +24,9 @@ type Xconomy struct { // Xconomy is a table in the database
 	Hidden  int     `gorm:"default:0"`
 }
 type Player struct {
-	UUID   string
-	Name   string
-	Avatar string
+	UUID   string `json:"uuid"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
 }
 
 func (Xconomy) TableName() string {
