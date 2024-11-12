@@ -85,6 +85,13 @@ type PlayTimeResponse struct {
 	LastLogin  string `json:"last_login"`
 	Avatar     string `json:"avatar"`
 }
+type DeathRankingResponse struct {
+	Ranking    int    `json:"ranking"`
+	PlayerName string `json:"player_name"`
+	Avatar     string `json:"avatar"`
+	UUID       string `json:"uuid"`
+	Amount     int    `json:"amount"`
+}
 type FishAmountRankingResponse struct {
 	Ranking    int    `json:"ranking"`
 	PlayerName string `json:"player_name"`
@@ -102,6 +109,19 @@ type FishSizeRankingResponse struct {
 	Avatar     string  `json:"avatar"`
 }
 
+func (con *Controller) getPlayerDeathResponse(pageInt int, ranking []model.PlayerDeathStats) []DeathRankingResponse {
+	var res []DeathRankingResponse
+	for i, record := range ranking {
+		res = append(res, DeathRankingResponse{
+			Ranking:    i + 1 + (pageInt-1)*20,
+			PlayerName: con.service.GetNameByUUID(record.PlayerId),
+			Avatar:     con.service.GetAvatar(con.service.GetNameByUUID(record.PlayerId)),
+			UUID:       record.PlayerId,
+			Amount:     record.DeathCount,
+		})
+	}
+	return res
+}
 func (con *Controller) getPlayerKillResponse(pageInt int, ranking []model.PlayerKillStats) []PlayerKillResponse {
 	var res []PlayerKillResponse
 	for i, record := range ranking {
@@ -302,18 +322,15 @@ func (con *Controller) HandleGetFishRankingByTotalAmount(c *gin.Context) {
 		utils.ErrorResponse(c, 401, "invalid page number", "")
 		return
 	}
-	fmt.Println("done1")
 	records, err := con.service.GetFishRankingByTotalAmount(pageInt)
 	if err != nil {
 		utils.ErrorResponse(c, 401, "error getting fish data", "")
 		return
 	}
-	fmt.Println("done2")
 	var res []FishAmountRankingResponse
 	for i, record := range records {
 		res = append(res, FishAmountRankingResponse{Ranking: i + 1 + (pageInt-1)*20, PlayerName: con.service.GetNameByUUID(record.Uuid), UUID: record.Uuid, FishName: "", Amount: con.service.GetTotalAmount(record), Avatar: con.service.GetAvatar(con.service.GetNameByUUID(record.Uuid))})
 	}
-	fmt.Println("done3")
 	utils.SuccessResponse(c, "ok", res)
 }
 func (con *Controller) HandleGetFishRankingBySize(c *gin.Context) {
@@ -336,6 +353,27 @@ func (con *Controller) HandleGetFishRankingBySize(c *gin.Context) {
 	}
 	utils.SuccessResponse(c, "ok", res)
 }
+func (con *Controller) HandleGetPlayers(c *gin.Context) {
+	players := con.service.GetPlayers()
+	utils.SuccessResponse(c, "ok", players)
+
+}
+func (con *Controller) HandleGetDeathRanking(c *gin.Context) {
+	page := c.Query("page")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		utils.ErrorResponse(c, 401, "invalid page number", "")
+		return
+	}
+	if pageInt == -1 {
+		utils.ErrorResponse(c, 401, "invalid page number", "")
+		return
+	}
+	ranking := con.service.GetDeathRanking(pageInt)
+	res := con.getPlayerDeathResponse(pageInt, ranking)
+	utils.SuccessResponse(c, "ok", res)
+
+}
 func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 	resp, err := http.Get("http://localhost:25577/api/players")
 	if err != nil {
@@ -343,11 +381,10 @@ func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 		return
 	}
 
-	defer resp.Body.Close()
 	var response PlayerListResponse
 	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
 	err = json.Unmarshal(body, &response)
-
 	if err != nil {
 		utils.ErrorResponse(c, 401, "error getting player list", "")
 		return
@@ -358,6 +395,7 @@ func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 	for i, player := range response.Survival.Players {
 		response.Survival.Players[i].Avatar = con.service.GetAvatar(player.Name)
 	}
+	fmt.Print(response)
 	utils.SuccessResponse(c, "ok", response)
 }
 

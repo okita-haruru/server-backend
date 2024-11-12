@@ -18,6 +18,7 @@ func NewRouter(server *Server, conf config.Config, socketserver *socketio.Server
 
 	//public
 	r.GET("/playerInfo", server.controller.HandleGetPlayerInfo)
+	r.GET("/players", server.controller.HandleGetPlayers)
 	r.GET("/ping", server.controller.HandlePing)
 	r.GET("/player_list", server.controller.HandleGetPlayerList)
 	r.GET("/fish", server.controller.HandleGetFish)
@@ -33,6 +34,7 @@ func NewRouter(server *Server, conf config.Config, socketserver *socketio.Server
 	r.GET("/ranking/fish/amount", server.controller.HandleGetFishRankingByAmount)
 	r.GET("/ranking/fish/size", server.controller.HandleGetFishRankingBySize)
 	r.GET("/ranking/fish/total_amount", server.controller.HandleGetFishRankingByTotalAmount)
+	r.GET("/ranking/death", server.controller.HandleGetDeathRanking)
 	r.GET("/profile", server.controller.HandleGetPlayerProfileByName)
 	v1 := r.Group("/v1")
 	authorizedV1 := v1.Group("/")

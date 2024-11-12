@@ -114,6 +114,21 @@ func (service *Service) GetUUIDByName(name string) string {
 	return record.UID
 }
 
+// GetPlayers
+func (service *Service) GetPlayers() []model.Player {
+	var records []model.Xconomy
+	var result []model.Player
+	service.db.DB.Model(&records).Find(&records)
+	for _, record := range records {
+		result = append(result, model.Player{
+			UUID:   record.UID,
+			Name:   record.Player,
+			Avatar: service.GetAvatar(record.Player),
+		})
+	}
+	return result
+}
+
 // GetPlayerProfileByUUID
 func (service *Service) GetPlayerProfileByName(name string) model.PlayerProfile {
 	var record model.PlayerProfile
@@ -199,7 +214,11 @@ func (service *Service) GetLoginRecordCountByDate() []LoginRecordRes {
 
 	return recordRes
 }
-
+func (service *Service) GetDeathRanking(pageInt int) []model.PlayerDeathStats {
+	var record []model.PlayerDeathStats
+	service.db.DB.Model(&record).Order("death_count desc").Offset((pageInt - 1) * 20).Limit(20).Find(&record)
+	return record
+}
 func (service *Service) GetDeathCount(uuid string) int {
 	var record model.PlayerDeathStats
 	service.db.DB.Model(&record).Where("player_id = ?", uuid).First(&record)

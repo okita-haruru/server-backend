@@ -23,6 +23,11 @@ type Xconomy struct { // Xconomy is a table in the database
 	Balance float32 `gorm:"default:0"`
 	Hidden  int     `gorm:"default:0"`
 }
+type Player struct {
+	UUID   string
+	Name   string
+	Avatar string
+}
 
 func (Xconomy) TableName() string {
 	return "xconomy"
@@ -113,4 +118,20 @@ func (LoginRecord) TableName() string {
 
 func (PlayTime) TableName() string {
 	return "play_time"
+}
+
+type PlayerList struct {
+	Msg  string                  `json:"msg"`
+	Code int                     `json:"code"`
+	Data map[string]ServerDetail `json:"data"`
+}
+type ServerDetail struct {
+	Players []PlayerDetail `json:"players"`
+	Count   int            `json:"count"`
+}
+type PlayerDetail struct {
+	Ping   int    `json:"ping"`
+	Name   string `json:"name"`
+	UUID   string `json:"uuid"`
+	Avatar string `json:"avatar"`
 }
