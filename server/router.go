@@ -17,6 +17,7 @@ func NewRouter(server *Server, conf config.Config, socketserver *socketio.Server
 	r.Use(static.Serve("/", static.LocalFile("/app/Demo-UI", true)))
 
 	//public
+	r.GET("/playerInfo", server.controller.HandleGetPlayerInfo)
 	r.GET("/ping", server.controller.HandlePing)
 	r.GET("/player_list", server.controller.HandleGetPlayerList)
 	r.GET("/fish", server.controller.HandleGetFish)
@@ -27,7 +28,7 @@ func NewRouter(server *Server, conf config.Config, socketserver *socketio.Server
 	r.GET("/ranking/kills/warden", server.controller.HandleGetPlayerKillStatsSortByWarden)
 	r.GET("/ranking/kills/ender_dragon", server.controller.HandleGetPlayerKillStatsSortByEnderDragon)
 	r.GET("/ranking/kills/wither", server.controller.HandleGetPlayerKillStatsSortByWither)
-	r.GET("/ranking/kills/piglin", server.controller.HandleGetPlayerKillStatsSortByPiglin)
+	r.GET("/ranking/kills/piglin_brute", server.controller.HandleGetPlayerKillStatsSortByPiglin)
 	r.GET("/ranking/kills/phantom", server.controller.HandleGetPlayerKillStatsSortByPhantom)
 	r.GET("/ranking/fish/amount", server.controller.HandleGetFishRankingByAmount)
 	r.GET("/ranking/fish/size", server.controller.HandleGetFishRankingBySize)

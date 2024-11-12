@@ -68,7 +68,7 @@ type PlayerKillResponse struct {
 	PlayerName           string `json:"player_name"`
 	AncientGuardianKills int    `json:"ancient_guardian_kills"`
 	PhantomKills         int    `json:"phantom_kills"`
-	PiglinKills          int    `json:"piglin_kills"`
+	PiglinBruteKills     int    `json:"piglin_brute_kills"`
 	EnderDragonKills     int    `json:"ender_dragon_kills"`
 	WitherKills          int    `json:"wither_kills"`
 	WardenKills          int    `json:"warden_kills"`
@@ -111,11 +111,11 @@ func (con *Controller) getPlayerKillResponse(pageInt int, ranking []model.Player
 			PlayerName:           con.service.GetNameByUUID(record.PlayerId),
 			AncientGuardianKills: record.AncientGuardianKills,
 			PhantomKills:         record.PhantomKills,
-			PiglinKills:          record.PiglinKills,
+			PiglinBruteKills:     record.PiglinBruteKills,
 			EnderDragonKills:     record.EnderDragonKills,
 			WitherKills:          record.WitherKills,
 			WardenKills:          record.WardenKills,
-			TotalKills:           record.AncientGuardianKills + record.PhantomKills + record.PiglinKills + record.EnderDragonKills + record.WitherKills + record.WardenKills,
+			TotalKills:           record.AncientGuardianKills + record.PhantomKills + record.PiglinBruteKills + record.EnderDragonKills + record.WitherKills + record.WardenKills,
 			Avatar:               con.service.GetAvatar(con.service.GetNameByUUID(record.PlayerId)),
 		})
 	}
@@ -126,6 +126,15 @@ func formatTime(time int) string {
 	minute := (time % 3600) / 60
 	second := time % 60
 	return strconv.Itoa(hour) + "小时 " + strconv.Itoa(minute) + "分钟 " + strconv.Itoa(second) + "秒"
+}
+func (con *Controller) HandleGetPlayerInfo(c *gin.Context) {
+	username := c.Query("username")
+	info, err := con.service.GetPlayerInfo(username)
+	if err != nil {
+		utils.ErrorResponse(c, 401, "error getting player info", err.Error())
+		return
+	}
+	utils.SuccessResponse(c, "ok", info)
 }
 func (con *Controller) HandleGetPlayTime(c *gin.Context) {
 	page := c.Query("page")
@@ -275,7 +284,7 @@ func (con *Controller) HandleGetFishRankingByAmount(c *gin.Context) {
 		utils.ErrorResponse(c, 401, "invalid page number", "")
 		return
 	}
-	err, records := con.service.GetFishRankingByAmount(fish, pageInt)
+	records, err := con.service.GetFishRankingByAmount(fish, pageInt)
 	if err != nil {
 		utils.ErrorResponse(c, 401, "error getting fish data", "")
 		return
@@ -294,7 +303,7 @@ func (con *Controller) HandleGetFishRankingByTotalAmount(c *gin.Context) {
 		return
 	}
 	fmt.Println("done1")
-	err, records := con.service.GetFishRankingByTotalAmount(pageInt)
+	records, err := con.service.GetFishRankingByTotalAmount(pageInt)
 	if err != nil {
 		utils.ErrorResponse(c, 401, "error getting fish data", "")
 		return
@@ -316,7 +325,7 @@ func (con *Controller) HandleGetFishRankingBySize(c *gin.Context) {
 		return
 
 	}
-	err, records := con.service.GetFishRankingBySize(fish, pageInt)
+	records, err := con.service.GetFishRankingBySize(fish, pageInt)
 	if err != nil {
 		utils.ErrorResponse(c, 401, "error getting fish data", "")
 		return

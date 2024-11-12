@@ -8,10 +8,14 @@ type PlayerKillStats struct {
 	PlayerId             string `gorm:"primaryKey"`
 	AncientGuardianKills int    `gorm:"default:0"`
 	PhantomKills         int    `gorm:"default:0"`
-	PiglinKills          int    `gorm:"default:0"`
+	PiglinBruteKills     int    `gorm:"default:0"`
 	EnderDragonKills     int    `gorm:"default:0"`
 	WitherKills          int    `gorm:"default:0"`
 	WardenKills          int    `gorm:"default:0"`
+}
+type PlayerDeathStats struct {
+	PlayerId   string `gorm:"primaryKey"`
+	DeathCount int    `gorm:"default:0"`
 }
 type Xconomy struct { // Xconomy is a table in the database
 	UID     string `gorm:"primaryKey"`
@@ -50,9 +54,41 @@ type PlayerProfile struct {
 	Xconomy   Xconomy
 }
 type PlayerInfo struct {
-	Uuid   string `json:"uuid"`
-	Name   string `json:"name"`
-	Avatar string `json:"avatar"`
+	Uuid     string `json:"uuid"`
+	Name     string `json:"name"`
+	Avatar   string `json:"avatar"`
+	States   States `json:"states"`
+	Join     int64  `json:"join"`
+	LastSeen int64  `json:"lastSeen"`
+	PlayTime int64  `json:"playTime"`
+}
+type RankingInt struct {
+	Rank  int `json:"rank"`
+	Value int `json:"value"`
+}
+type RankingFloat struct {
+	Rank  int     `json:"rank"`
+	Value float32 `json:"value"`
+}
+type States struct {
+	TotalFishing RankingInt       `json:"totalFishing"`
+	Fishing      []FishingRanking `json:"fishing"`
+	Balance      RankingFloat     `json:"balance"`
+	Death        RankingInt       `json:"death"`
+	Kills        KillRanking      `json:"kills"`
+}
+type KillRanking struct {
+	Warden          RankingInt `json:"warden"`
+	AncientGuardian RankingInt `json:"ancientGuardian"`
+	EnderDragon     RankingInt `json:"enderDragon"`
+	Wither          RankingInt `json:"wither"`
+	PiglinBrute     RankingInt `json:"piglinBrute"`
+	Phantom         RankingInt `json:"phantom"`
+}
+type FishingRanking struct {
+	Name    string       `json:"name"`
+	Amount  RankingInt   `json:"amount"`
+	MaxSize RankingFloat `json:"maxSize"`
 }
 type PlayTime struct {
 	UUID       string    `gorm:"primaryKey" json:"uuid"`
@@ -66,6 +102,9 @@ type LoginRecord struct {
 	UUID      string `gorm:"primaryKey"`
 	Name      string
 	LoginTime time.Time `gorm:"type:date"`
+}
+type UserInfo struct {
+	UUID string `gorm:"primaryKey"`
 }
 
 func (LoginRecord) TableName() string {
