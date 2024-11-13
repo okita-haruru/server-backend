@@ -381,7 +381,7 @@ func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 		return
 	}
 
-	var response PlayerListResponse
+	var response model.PlayerListResponse
 	body, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	err = json.Unmarshal(body, &response)
@@ -398,20 +398,28 @@ func (con *Controller) HandleGetPlayerList(c *gin.Context) {
 	fmt.Print(response)
 	utils.SuccessResponse(c, "ok", response)
 }
+func (con *Controller) HandleGetStartTime(c *gin.Context) {
+	resp, err := http.Get("http://localhost:25577/api/start_time")
+	if err != nil {
+		utils.ErrorResponse(c, 501, "game server gg", "")
+		return
+	}
 
-type PlayerListResponse struct {
-	Lobby    RoomJson `json:"lobby"`
-	Survival RoomJson `json:"survival"`
+	var response StartTimeResponse
+	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		utils.ErrorResponse(c, 401, "error getting start time", "")
+		return
+	}
+
+	fmt.Print(response)
+	utils.SuccessResponse(c, "ok", response)
 }
-type RoomJson struct {
-	Players []PlayerJson `json:"players"`
-	Count   int          `json:"count"`
-}
-type PlayerJson struct {
-	Ping   int    `json:"ping"`
-	Name   string `json:"name"`
-	UUID   string `json:"uuid"`
-	Avatar string `json:"avatar"`
+
+type StartTimeResponse struct {
+	StartTime int `json:"start_time"`
 }
 
 func (con *Controller) HandleGetPlayerProfileByName(c *gin.Context) {

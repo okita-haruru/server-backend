@@ -3,9 +3,12 @@ package service
 import (
 	"bytes"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"os"
 	"sort"
+	"strconv"
+	"strings"
 	"sushi/model"
 )
 
@@ -137,13 +140,32 @@ func (service *Service) GetFish() ([]Fish, error) {
 		if err != nil {
 			return nil, err
 		}
+		var minSize, maxSize int
+		if csvdata[5] != "" {
+			parts := strings.Split(csvdata[5], "~")
+			minSize, _ = strconv.Atoi(parts[0])
+			maxSize, _ = strconv.Atoi(parts[1])
+		} else {
+			minSize = 0
+			maxSize = 0
+		}
 
+		price, _ := strconv.Atoi(csvdata[7])
 		if csvdata[0] != "" && csvdata[3] != "" {
 			fishes = append(fishes, Fish{
-				Name: csvdata[0],
-				Key:  csvdata[3],
+				Name:         csvdata[0],
+				Key:          csvdata[3],
+				FormalName:   csvdata[1],
+				LatinName:    csvdata[2],
+				MinSize:      minSize,
+				MaxSize:      maxSize,
+				Price:        price,
+				Rarity:       csvdata[10],
+				Description:  csvdata[14],
+				Distribution: csvdata[19],
 			})
 		}
+		fmt.Println("test6")
 	}
 	return fishes, nil
 }

@@ -2,7 +2,10 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net/http"
 	"sushi/model"
 	"sushi/utils/DB"
 	"sushi/utils/config"
@@ -80,6 +83,7 @@ func (service *Service) GetPlayerInfo(username string) (*model.PlayerInfo, error
 		Join:     playTime.FirstLogin.Unix(),
 		LastSeen: playTime.LastLogin.Unix(),
 		PlayTime: int64(playTime.PlayTime),
+		IsOnline: service.IsPlayerOnline(uuid),
 	}
 	return &playerInfo, nil
 }
@@ -129,7 +133,6 @@ func (service *Service) GetPlayers() []model.Player {
 	return result
 }
 
-// GetPlayerProfileByUUID
 func (service *Service) GetPlayerProfileByName(name string) model.PlayerProfile {
 	var record model.PlayerProfile
 	uuid := service.GetUUIDByName(name)
@@ -151,8 +154,16 @@ func (service *Service) GetAvatar(name string) string {
 }
 
 type Fish struct {
-	Name string `json:"name"`
-	Key  string `json:"key"`
+	Name         string `json:"name"`
+	FormalName   string `json:"formal_name"`
+	Key          string `json:"key"`
+	LatinName    string `json:"latin_name"`
+	MinSize      int    `json:"min_size"`
+	MaxSize      int    `json:"max_size"`
+	Price        int    `json:"price"`
+	Rarity       string `json:"rarity"`
+	Description  string `json:"description"`
+	Distribution string `json:"distribution"`
 }
 
 func (service *Service) GetPlayerBalanceRanking(uuid string) model.RankingFloat {
@@ -189,17 +200,14 @@ func (service *Service) GetLoginRecordCountByDate() []LoginRecordRes {
 	var recordRes []LoginRecordRes
 	service.db.DB.Model(&record).Select("login_time, count(*) as count").Group("login_time").Order("login_time").Find(&recordCount)
 
-	// 创建一个map，以便于快速查找日期
 	recordCountMap := make(map[string]int)
 	for _, v := range recordCount {
 		recordCountMap[v.LoginTime.Format("2006-01-02")] = v.Count
 	}
 
-	// 获取日期范围
 	startDate := recordCount[0].LoginTime
 	endDate := recordCount[len(recordCount)-1].LoginTime
 
-	// 遍历日期范围
 	for d := startDate; d.Before(endDate) || d.Equal(endDate); d = d.AddDate(0, 0, 1) {
 		dateStr := d.Format("2006-01-02")
 		count, exists := recordCountMap[dateStr]
@@ -223,4 +231,38 @@ func (service *Service) GetDeathCount(uuid string) int {
 	var record model.PlayerDeathStats
 	service.db.DB.Model(&record).Where("player_id = ?", uuid).First(&record)
 	return record.DeathCount
+}
+
+func (service *Service) getOnlinePlayerList() ([]model.PlayerDetail, error) {
+	resp, err := http.Get("http://localhost:25577/api/players")
+	if err != nil {
+		return nil, err
+	}
+	var response model.PlayerListResponse
+	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return nil, err
+	}
+	var result []model.PlayerDetail
+	for _, player := range response.Lobby.Players {
+		result = append(result, player)
+	}
+	for _, player := range response.Survival.Players {
+		result = append(result, player)
+	}
+	return result, nil
+}
+func (service *Service) IsPlayerOnline(uuid string) bool {
+	players, err := service.getOnlinePlayerList()
+	if err != nil {
+		return false
+	}
+	for _, player := range players {
+		if player.UUID == uuid {
+			return true
+		}
+	}
+	return false
 }

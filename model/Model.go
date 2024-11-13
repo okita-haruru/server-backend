@@ -66,6 +66,7 @@ type PlayerInfo struct {
 	Join     int64  `json:"join"`
 	LastSeen int64  `json:"lastSeen"`
 	PlayTime int64  `json:"playTime"`
+	IsOnline bool   `json:"isOnline"`
 }
 type RankingInt struct {
 	Rank  int `json:"rank"`
@@ -120,18 +121,17 @@ func (PlayTime) TableName() string {
 	return "play_time"
 }
 
-type PlayerList struct {
-	Msg  string                  `json:"msg"`
-	Code int                     `json:"code"`
-	Data map[string]ServerDetail `json:"data"`
-}
-type ServerDetail struct {
-	Players []PlayerDetail `json:"players"`
-	Count   int            `json:"count"`
-}
 type PlayerDetail struct {
 	Ping   int    `json:"ping"`
 	Name   string `json:"name"`
 	UUID   string `json:"uuid"`
 	Avatar string `json:"avatar"`
+}
+type PlayerListResponse struct {
+	Lobby    RoomJson `json:"lobby"`
+	Survival RoomJson `json:"survival"`
+}
+type RoomJson struct {
+	Players []PlayerDetail `json:"players"`
+	Count   int            `json:"count"`
 }
