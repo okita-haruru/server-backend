@@ -3,7 +3,6 @@ package service
 import (
 	"bytes"
 	"encoding/csv"
-	"fmt"
 	"io"
 	"os"
 	"sort"
@@ -165,7 +164,6 @@ func (service *Service) GetFish() ([]Fish, error) {
 				Distribution: csvdata[19],
 			})
 		}
-		fmt.Println("test6")
 	}
 	return fishes, nil
 }
