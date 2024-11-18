@@ -8,8 +8,14 @@ func (service *Service) GetPlayerWardenKillRanking(uuid string) model.RankingInt
 	killCount := record.WardenKills
 	var count int64
 	service.db.DB.Model(&record).Where("warden_kills > ?", killCount).Count(&count)
+	var rank int
+	if killCount == 0 {
+		rank = -1
+	} else {
+		rank = int(count) + 1
+	}
 	return model.RankingInt{
-		Rank:  int(count) + 1,
+		Rank:  rank,
 		Value: killCount,
 	}
 }
@@ -19,8 +25,14 @@ func (service *Service) GetPlayerEnderDragonKillRanking(uuid string) model.Ranki
 	killCount := record.EnderDragonKills
 	var count int64
 	service.db.DB.Model(&record).Where("ender_dragon_kills > ?", killCount).Count(&count)
+	var rank int
+	if killCount == 0 {
+		rank = -1
+	} else {
+		rank = int(count) + 1
+	}
 	return model.RankingInt{
-		Rank:  int(count) + 1,
+		Rank:  rank,
 		Value: killCount,
 	}
 }
@@ -30,8 +42,14 @@ func (service *Service) GetPlayerWitherKillRanking(uuid string) model.RankingInt
 	killCount := record.WitherKills
 	var count int64
 	service.db.DB.Model(&record).Where("wither_kills > ?", killCount).Count(&count)
+	var rank int
+	if killCount == 0 {
+		rank = -1
+	} else {
+		rank = int(count) + 1
+	}
 	return model.RankingInt{
-		Rank:  int(count) + 1,
+		Rank:  rank,
 		Value: killCount,
 	}
 }
@@ -41,8 +59,14 @@ func (service *Service) GetPlayerPiglinBruteKillRanking(uuid string) model.Ranki
 	killCount := record.PiglinBruteKills
 	var count int64
 	service.db.DB.Model(&record).Where("piglin_brute_kills > ?", killCount).Count(&count)
+	var rank int
+	if killCount == 0 {
+		rank = -1
+	} else {
+		rank = int(count) + 1
+	}
 	return model.RankingInt{
-		Rank:  int(count) + 1,
+		Rank:  rank,
 		Value: killCount,
 	}
 }
@@ -52,8 +76,14 @@ func (service *Service) GetPlayerPhantomKillRanking(uuid string) model.RankingIn
 	killCount := record.PhantomKills
 	var count int64
 	service.db.DB.Model(&record).Where("phantom_kills > ?", killCount).Count(&count)
+	var rank int
+	if killCount == 0 {
+		rank = -1
+	} else {
+		rank = int(count) + 1
+	}
 	return model.RankingInt{
-		Rank:  int(count) + 1,
+		Rank:  rank,
 		Value: killCount,
 	}
 }
@@ -63,8 +93,14 @@ func (service *Service) GetPlayerAncientGuardianKillRanking(uuid string) model.R
 	killCount := record.AncientGuardianKills
 	var count int64
 	service.db.DB.Model(&record).Where("ancient_guardian_kills > ?", killCount).Count(&count)
+	var rank int
+	if killCount == 0 {
+		rank = -1
+	} else {
+		rank = int(count) + 1
+	}
 	return model.RankingInt{
-		Rank:  int(count) + 1,
+		Rank:  rank,
 		Value: killCount,
 	}
 
