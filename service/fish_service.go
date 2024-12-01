@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"os"
 	"sort"
@@ -133,12 +134,20 @@ func (service *Service) GetFish() ([]Fish, error) {
 	reader.Read()
 	for {
 		csvdata, err := reader.Read() // 按行读取数据,可控制读取部分
+
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
 			return nil, err
 		}
+		if csvdata[9] != "1" {
+			continue
+		}
+		if csvdata[9] == "" {
+			break
+		}
+		fmt.Println(csvdata[0])
 		var minSize, maxSize int
 		if csvdata[5] != "" {
 			parts := strings.Split(csvdata[5], "~")
